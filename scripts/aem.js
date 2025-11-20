@@ -409,6 +409,44 @@ function wrapTextNodes(block) {
 }
 
 /**
+ * Decorates all anchor elements within a container by adding appropriate button classes
+ * based on their parent element structure. Links are converted to buttons with different
+ * styles (default, primary, or secondary) depending on their wrapping elements.
+ * - Default button: link wrapped in a single _< p >_ or _< div >_
+ * - Primary button: link wrapped in _< strong >_ within a _< p >_
+ * - Secondary button: link wrapped in _< em >_ within a _< p >_
+ *
+ * Links containing images are excluded from button decoration.
+ *
+ * @param {Element} a - The anchor element to potentially convert to a button
+ */
+function addButtonClasses(a) {
+  if (a.querySelector('img')) return;
+  const parentEl = a.parentElement;
+
+  if (parentEl.childNodes.length !== 1) return;
+  const isDefaultButton = ['DIV', 'P'].includes(parentEl.tagName);
+  let buttonContainer = parentEl;
+
+  a.className = 'button';
+
+  if (!isDefaultButton && parentEl.parentElement?.childNodes.length === 1) {
+    buttonContainer = parentEl.parentElement;
+    const isTextElement = buttonContainer.tagName === 'P';
+    const isPrimaryButton = isTextElement && parentEl.tagName === 'STRONG';
+    const isSecondaryButton = isTextElement && parentEl.tagName === 'EM';
+
+    if (isPrimaryButton) {
+      a.classList.add('primary');
+    } else if (isSecondaryButton) {
+      a.classList.add('secondary');
+    }
+  }
+
+  buttonContainer.classList.add('button-container');
+}
+
+/**
  * Decorates paragraphs containing a single link as buttons.
  * @param {Element} element container element
  */
@@ -416,32 +454,7 @@ function decorateButtons(element) {
   element.querySelectorAll('a').forEach((a) => {
     a.title = a.title || a.textContent;
     if (a.href !== a.textContent) {
-      const up = a.parentElement;
-      const twoup = a.parentElement.parentElement;
-      if (!a.querySelector('img')) {
-        if (up.childNodes.length === 1 && (up.tagName === 'P' || up.tagName === 'DIV')) {
-          a.className = 'button'; // default
-          up.classList.add('button-container');
-        }
-        if (
-          up.childNodes.length === 1
-          && up.tagName === 'STRONG'
-          && twoup.childNodes.length === 1
-          && twoup.tagName === 'P'
-        ) {
-          a.className = 'button primary';
-          twoup.classList.add('button-container');
-        }
-        if (
-          up.childNodes.length === 1
-          && up.tagName === 'EM'
-          && twoup.childNodes.length === 1
-          && twoup.tagName === 'P'
-        ) {
-          a.className = 'button secondary';
-          twoup.classList.add('button-container');
-        }
-      }
+      addButtonClasses(a);
     }
   });
 }
