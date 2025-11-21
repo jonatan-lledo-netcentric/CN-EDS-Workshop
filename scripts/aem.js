@@ -426,20 +426,21 @@ function addButtonClasses(a) {
 
   if (parentEl.childNodes.length !== 1) return;
   const isDefaultButton = ['DIV', 'P'].includes(parentEl.tagName);
+  const buttonClass = 'button';
   let buttonContainer = parentEl;
 
-  a.className = 'button';
-
-  if (!isDefaultButton && parentEl.parentElement?.childNodes.length === 1) {
+  if (isDefaultButton) {
+    a.className = buttonClass;
+  } else if (!isDefaultButton && parentEl.parentElement?.childNodes.length === 1) {
     buttonContainer = parentEl.parentElement;
     const isTextElement = buttonContainer.tagName === 'P';
     const isPrimaryButton = isTextElement && parentEl.tagName === 'STRONG';
     const isSecondaryButton = isTextElement && parentEl.tagName === 'EM';
 
     if (isPrimaryButton) {
-      a.classList.add('primary');
+      a.className = `${buttonClass} primary`;
     } else if (isSecondaryButton) {
-      a.classList.add('secondary');
+      a.className = `${buttonClass} secondary`;
     }
   }
 
