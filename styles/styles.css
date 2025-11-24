@@ -203,11 +203,25 @@ button:disabled:hover {
   cursor: unset;
 }
 
+a.button.primary,
+button.primary {
+  background-color: var(--link-color);
+  color: var(--background-color);
+}
+
+a.button.primary:hover,
+button.primary:hover,
 a.button.secondary,
 button.secondary {
   background-color: unset;
   border: 2px solid currentcolor;
   color: var(--text-color);
+}
+
+a.button.secondary:hover,
+button.secondary:hover {
+  color: var(--background-color);
+  background-color: var(--link-hover-color);
 }
 
 main img {

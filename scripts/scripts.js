@@ -14,6 +14,48 @@ import {
 } from './aem.js';
 
 /**
+ * Converts variant class names to BEM (Block Element Modifier) naming convention.
+ * Searches for variant classes in the provided classList
+ * and replaces them with BEM-formatted variants.
+ *
+ * @param {Object} options - The options object
+ * @param {string} options.blockName - The base block name for BEM convention
+ * @param {DOMTokenList} options.blockClasses
+ * - The classList object containing the classes to transform
+ * @param {string|string[]} options.variants
+ * - Single variant string or array of variant strings to convert
+ * @returns {void}
+ *
+ * @example
+ * // Convert a single variant
+ * variantClassesToBEM({
+ *   blockName: 'button',
+ *   blockClasses: element.classList,
+ *   variants: 'primary'
+ * });
+ * // Converts class "primary" to "button--primary"
+ *
+ * @example
+ * // Convert multiple variants
+ * variantClassesToBEM({
+ *   blockName: 'card',
+ *   blockClasses: element.classList,
+ *   variants: ['large', 'featured']
+ * });
+ * // Converts "large" to "card--large" and "featured" to "card--featured"
+ */
+export function variantClassesToBEM({ blockName, blockClasses, variants } = {}) {
+  if (!blockName || !blockClasses || !variants) return;
+  const variantList = Array.isArray(variants) ? variants : [variants];
+  variantList.forEach((variant) => {
+    if (blockClasses.contains(variant)) {
+      blockClasses.remove(variant);
+      blockClasses.add(`${blockName}--${variant}`);
+    }
+  });
+}
+
+/**
  * Builds hero block and prepends to main in a new section.
  * @param {Element} main The container element
  */
@@ -23,7 +65,9 @@ function buildHeroBlock(main) {
   // eslint-disable-next-line no-bitwise
   if (h1 && picture && (h1.compareDocumentPosition(picture) & Node.DOCUMENT_POSITION_PRECEDING)) {
     const section = document.createElement('div');
-    section.append(buildBlock('hero', { elems: [picture, h1] }));
+    const heroBlock = buildBlock('hero', { elems: [picture, h1] });
+    heroBlock.classList.add('auto-block');
+    section.append(heroBlock);
     main.prepend(section);
   }
 }
