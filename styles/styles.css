@@ -241,6 +241,16 @@ main img {
   width: 100%;
 }
 
+/* paragraphs with icons */
+p:not(:only-child):has( > .icon) {
+  display: flex;
+  align-items: center;
+}
+
+p:not(:only-child) > .icon {
+  padding-inline-end: 8px;
+}
+
 /* sections */
 main > .section {
   margin: 40px 0;
@@ -254,6 +264,10 @@ main > .section > div {
 
 main > .section:first-of-type {
   margin-top: 0;
+}
+
+.section.center {
+  text-align: center;
 }
 
 @media (width >= 900px) {

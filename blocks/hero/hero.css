@@ -43,6 +43,10 @@
   color: var(--background-color);
 }
 
+.hero.hero--dark-background a.primary:hover {
+  color: currentcolor;
+}
+
 @media (width >= 900px) {
   .hero {
     padding: 40px 32px;
