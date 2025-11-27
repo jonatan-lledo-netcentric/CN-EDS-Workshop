@@ -1,0 +1,21 @@
+body.dark {
+  --background-color: #121212;
+  --text-color: #e0e0e0;
+  --link-color: #bb86fc;
+
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+body.dark a:any-link {
+  color: var(--link-color);
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+body.dark .hero--auto-block h1 {
+  color: var(--text-color);
+}
+
+body.dark .footer {
+  background-color: var(--dark-color);
+}

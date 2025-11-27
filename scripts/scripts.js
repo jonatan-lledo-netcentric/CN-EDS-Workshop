@@ -11,6 +11,8 @@ import {
   loadSection,
   loadSections,
   loadCSS,
+  toClassName,
+  getMetadata,
 } from './aem.js';
 
 /**
@@ -85,6 +87,45 @@ async function loadFonts() {
 }
 
 /**
+ * This function loads and decorates the template specified in metadata with the key "`template`".
+ *
+ * Any template _**MUST**_ have a corresponding `CSS` and `JS` file in the templates folder.
+ * like a block, the template folder and its files must share the same name.
+ * @param {Element} main The main element
+ */
+async function loadTemplate(main) {
+  const template = toClassName(getMetadata('template'));
+  if (template) {
+    try {
+      await loadCSS(`${window.hlx.codeBasePath}/templates/${template}/${template}.css`);
+      const mod = await import(`../templates/${template}/${template}.js`);
+      if (mod.default) {
+        await mod.default(main);
+      }
+    } catch (e) {
+      console.error(`failed to load template %c${template}`, 'color: gold', { error: e });
+    }
+  }
+}
+
+/**
+ * This function loads and applies the theme specified in metadata with the key "`theme`".
+ *
+ * Any theme _**MUST**_ have a corresponding `CSS` file in the themes folder.
+ * @returns {Promise<void>}
+ */
+async function loadTheme() {
+  const theme = toClassName(getMetadata('theme'));
+  if (theme) {
+    try {
+      await loadCSS(`${window.hlx.codeBasePath}/themes/${theme}/${theme}.css`);
+    } catch (e) {
+      console.error(`failed to load theme %c${theme}`, 'color: gold', { error: e });
+    }
+  }
+}
+
+/**
  * Builds all synthetic blocks in a container element.
  * @param {Element} main The container element
  */
@@ -138,6 +179,8 @@ async function loadEager(doc) {
   decorateTemplateAndTheme();
   const main = doc.querySelector('main');
   if (main) {
+    await loadTemplate(main);
+    await loadTheme();
     decorateMain(main);
     document.body.classList.add('appear');
     await loadSection(main.querySelector('.section'), waitForFirstImage);
