@@ -13,7 +13,11 @@ import {
   loadCSS,
   toClassName,
   getMetadata,
+  fetchPlaceholders,
 } from './aem.js';
+
+const defaultLocale = 'en-us';
+const defaultLanguage = 'en';
 
 /**
  * Converts variant class names to BEM (Block Element Modifier) naming convention.
@@ -57,6 +61,24 @@ export function variantClassesToBEM({ blockName, blockClasses, variants } = {}) 
   });
 }
 
+/** Retrieves the locale from metadata or returns the default locale.
+ * @returns {string} The locale string
+ */
+export function getLocale() {
+  const locale = getMetadata('locale');
+  return locale || defaultLocale;
+}
+
+/** Retrieves the language from locale or returns the default language.
+ * @param {boolean} [isUpperCase=false] Whether to return the language in uppercase
+ * @returns {string} The language string
+ */
+export function getLanguage(isUpperCase = false) {
+  const locale = getLocale();
+  const language = locale.split('-')[0] || defaultLanguage;
+  return isUpperCase ? language.toUpperCase() : language;
+}
+
 /**
  * Builds hero block and prepends to main in a new section.
  * @param {Element} main The container element
@@ -72,6 +94,44 @@ function buildHeroBlock(main) {
     section.append(heroBlock);
     main.prepend(section);
   }
+}
+
+/** Retrieves placeholder text based on key and optional prefix.
+ * @param {string} key The placeholder key
+ * @param {string} [prefix='default'] The optional prefix for placeholder categories
+ * @returns {string} The corresponding placeholder text or an empty string if not found
+ */
+function getPlaceholderText({ key, prefix = 'default' } = {}) {
+  try {
+    const placeholders = window.placeholders[prefix] || {};
+    return placeholders[key] || '';
+  } catch (e) {
+    return '';
+  }
+}
+
+/** Builds demo placeholder text in paragraphs.
+ * @param {Element} main The container element
+ */
+function buildDemoPlaceholder(main) {
+  const paragraphs = main.querySelectorAll('p');
+  const placeholderKey = 'demo:placeholder-text';
+  paragraphs.forEach((p) => {
+    if (p.textContent.trim().includes(placeholderKey)) {
+      const span = document.createElement('span');
+      const { prefix } = window.placeholders;
+      span.style.backgroundColor = 'yellow';
+      span.textContent = getPlaceholderText({ key: placeholderKey, prefix });
+      // Safely replace the placeholder key with the span using DOM manipulation
+      const parts = p.textContent.split(placeholderKey);
+      p.textContent = ''; // Clear existing content
+      p.append(document.createTextNode(parts[0]));
+      p.append(span);
+      if (parts.length > 1) {
+        p.append(document.createTextNode(parts.slice(1).join(placeholderKey)));
+      }
+    }
+  });
 }
 
 /**
@@ -150,6 +210,7 @@ function buildAutoBlocks(main) {
     }
 
     buildHeroBlock(main);
+    buildDemoPlaceholder(main);
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Auto Blocking failed', error);
@@ -175,7 +236,13 @@ export function decorateMain(main) {
  * @param {Element} doc The container element
  */
 async function loadEager(doc) {
-  document.documentElement.lang = 'en';
+  const isDefaultPrefix = getLanguage() === defaultLanguage;
+  const prefix = isDefaultPrefix ? 'default' : getLanguage();
+  if (!window.placeholders) {
+    window.placeholders = { prefix };
+  }
+  document.documentElement.lang = getLocale();
+  await fetchPlaceholders((isDefaultPrefix ? {} : { prefix }));
   decorateTemplateAndTheme();
   const main = doc.querySelector('main');
   if (main) {

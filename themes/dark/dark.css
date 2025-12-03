@@ -1,3 +1,4 @@
+/* stylelint-disable selector-class-pattern */
 body.dark {
   --background-color: #121212;
   --text-color: #e0e0e0;
@@ -7,11 +8,19 @@ body.dark {
   color: var(--text-color);
 }
 
-body.dark a:any-link {
-  color: var(--link-color);
+body.dark a.button.secondary:hover {
+  background-color: var(--link-color);
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
+body.dark .header .button-container,
+body.dark .highlight .default-content-wrapper {
+  --text-color: #131313;
+
+  color: var(--text-color);
+}
+
+
+body.dark .header,
 body.dark .hero--auto-block h1 {
   color: var(--text-color);
 }
